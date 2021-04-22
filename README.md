@@ -1,3 +1,3 @@
-# Luau A* Pathfinding
-A simple A* pathfinding test using Roact
+# CFramework
+A simple Roblox game framework that uses the Knit to tie everything together
 
