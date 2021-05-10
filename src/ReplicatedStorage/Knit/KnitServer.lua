@@ -13,20 +13,20 @@ local KnitServer = {}
 
 KnitServer.Version = script.Parent.Version.Value
 KnitServer.Services = {}
-KnitServer.Util = script.Parent.Util
+KnitServer.KnitUtils = script.Parent.KnitUtils
 
 
 local knitRepServiceFolder = Instance.new("Folder")
 knitRepServiceFolder.Name = "Services"
 
-local Promise = require(KnitServer.Util.Promise)
-local Thread = require(KnitServer.Util.Thread)
-local Signal = require(KnitServer.Util.Signal)
-local Loader = require(KnitServer.Util.Loader)
-local Ser = require(KnitServer.Util.Ser)
-local RemoteSignal = require(KnitServer.Util.Remote.RemoteSignal)
-local RemoteProperty = require(KnitServer.Util.Remote.RemoteProperty)
-local TableUtil = require(KnitServer.Util.TableUtil)
+local Promise = require(KnitServer.KnitUtils.Promise)
+local Thread = require(KnitServer.KnitUtils.Thread)
+local Signal = require(KnitServer.KnitUtils.Signal)
+local Loader = require(KnitServer.KnitUtils.Loader)
+local Ser = require(KnitServer.KnitUtils.Ser)
+local RemoteSignal = require(KnitServer.KnitUtils.Remote.RemoteSignal)
+local RemoteProperty = require(KnitServer.KnitUtils.Remote.RemoteProperty)
+local TableUtil = require(KnitServer.KnitUtils.TableUtil)
 
 local started = false
 local startedComplete = false

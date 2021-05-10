@@ -15,15 +15,15 @@ local KnitClient = {}
 KnitClient.Version = script.Parent.Version.Value
 KnitClient.Player = game:GetService("Players").LocalPlayer
 KnitClient.Controllers = {}
-KnitClient.Util = script.Parent.Util
+KnitClient.KnitUtils = script.Parent.KnitUtils
 
-local Promise = require(KnitClient.Util.Promise)
-local Thread = require(KnitClient.Util.Thread)
-local Loader = require(KnitClient.Util.Loader)
-local Ser = require(KnitClient.Util.Ser)
-local ClientRemoteSignal = require(KnitClient.Util.Remote.ClientRemoteSignal)
-local ClientRemoteProperty = require(KnitClient.Util.Remote.ClientRemoteProperty)
-local TableUtil = require(KnitClient.Util.TableUtil)
+local Promise = require(KnitClient.KnitUtils.Promise)
+local Thread = require(KnitClient.KnitUtils.Thread)
+local Loader = require(KnitClient.KnitUtils.Loader)
+local Ser = require(KnitClient.KnitUtils.Ser)
+local ClientRemoteSignal = require(KnitClient.KnitUtils.Remote.ClientRemoteSignal)
+local ClientRemoteProperty = require(KnitClient.KnitUtils.Remote.ClientRemoteProperty)
+local TableUtil = require(KnitClient.KnitUtils.TableUtil)
 
 local services = {}
 local servicesFolder = script.Parent:WaitForChild("Services")
