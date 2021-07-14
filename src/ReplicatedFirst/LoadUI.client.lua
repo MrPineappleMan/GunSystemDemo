@@ -45,8 +45,6 @@ end
 wait(2)
 _G.GuiLoaded = true
 event:Fire()
-warn("Fired")
-print(tick())
 if (shouldRemove) then
 	script:Destroy()
 end
