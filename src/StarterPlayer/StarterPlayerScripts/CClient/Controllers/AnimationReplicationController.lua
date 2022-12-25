@@ -1,15 +1,15 @@
 local Knit = require(game:GetService("ReplicatedStorage").Knit)
 
-local AnimationController = Knit.CreateController({
-    ["Name"] = "AnimationController",
+local AnimationReplicationController = Knit.CreateController({
+    ["Name"] = "AnimationReplicationController",
 })
 
-function AnimationController:KnitStart()
+function AnimationReplicationController:KnitStart()
 	
 end
 
-function AnimationController:KnitInit()
+function AnimationReplicationController:KnitInit()
 	
 end
 
-return AnimationController
+return AnimationReplicationController

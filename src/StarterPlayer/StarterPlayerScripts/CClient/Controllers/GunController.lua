@@ -40,7 +40,6 @@ end
 
 local function RemoveGunFromSystem(instance)
 	local gun = GunsOnHand[instance]
-	print("DESTROY")
 	gun:Destroy()
 	GunsOnHand[instance] = nil
 end

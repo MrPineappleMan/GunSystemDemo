@@ -8,20 +8,21 @@ GunClass.__index = GunClass
 function GunClass.new(gunInstance)
 	local self = setmetatable({
 		["GunInstance"] = gunInstance,
-		
+
 		["AmmoStore"] = gunInstance:GetAttribute("AmmoStore"),
 		["AmmoMag"] = gunInstance:GetAttribute("AmmoMag"),
-		
+
 		["Type"] = gunInstance:GetAttribute("GunType"),
-		["State"] = gunInstance:GetAttribute("GunState"),
-		
+		["State"] = nil,
+
 		["Maid"] = Maid.new()
 	}, GunClass)
-	
+
+	print(self)
     return self
 end
 
-function GunClass:Destroy() 
+function GunClass:Destroy()
 	self.Maid:DoCleaning()
 end
 

@@ -11,7 +11,8 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
-local Maid = require(Knit.Shared.Lib.Maid)
+local MaidClass = require(Knit.Shared.Lib.Maid)
+local AnimatorClass = require(Knit.Client.Classes.AnimatorClass)
 
 local Client = Players.LocalPlayer
 
@@ -22,12 +23,12 @@ local ViewModelAnimator = ViewModel.AnimationController.Animator
 
 local GunsFolder = Assets.Guns
 
-local Cleaner = Maid.new()
+local ViewModeAnimator = AnimatorClass.new(ViewModel.AnimationController.Animator)
+local Cleaner = MaidClass.new()
 
 local ViewModelController = Knit.CreateController({
 	["Name"] = "ViewModelController",
 })
-
 
 function ViewModelController:EquipGun(gunInstance)
 	if Cleaner.onUpdateTask == nil then
@@ -58,23 +59,15 @@ function ViewModelController:EquipGun(gunInstance)
 		end
 	end
 
-	local function loadAnimation(animation)
-		local track = ViewModelAnimator:LoadAnimation(animation)
-		return track
-	end
 
 
+	ViewModeAnimator:ImportAnimations(gunInstance.Animations)
 	GunBone.Parent = ViewModel.Camera.cameraBone["upArm.R"]["elbow.R"]["LowArm.R"]
-
 	setGunMotor6Ds()
 	moveGunParts()
-	local equipTrack = loadAnimation(ViewModel.Animations.equip)
-	equipTrack.Looped = false
-	equipTrack:Play()
-
-	local idleTrack = loadAnimation(ViewModel.Animations.idle)
-	idleTrack.Looped = true
-	idleTrack:Play()
+	
+	ViewModeAnimator:Play("equip")
+	ViewModeAnimator:Play("idle")
 
 	Cleaner.equipGunTrash = function()
 		for _, instance in pairs(gunChildren) do
