@@ -11,23 +11,26 @@ local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
+local GunController
+
 local MaidClass = require(Knit.Shared.Lib.Maid)
 local AnimatorClass = require(Knit.Client.Classes.AnimatorClass)
 
+local StateToNameConversionTable = require(script.StateToNameConversionTable)
+local ViewModelTransitions = require(script.ViewModelTransitions)
+local GunStateEnums = require(Knit.Shared.Constants).GunStateEnums
+
 local Client = Players.LocalPlayer
-
 local Assets = ReplicatedStorage.Assets
-
 local ViewModel = Assets.ViewModel
-local ViewModelAnimator = ViewModel.AnimationController.Animator
-
 local GunsFolder = Assets.Guns
 
-local ViewModeAnimator = AnimatorClass.new(ViewModel.AnimationController.Animator)
+local ViewModelAnimator = AnimatorClass.new(ViewModel.AnimationController.Animator)
 local Cleaner = MaidClass.new()
 
 local ViewModelController = Knit.CreateController({
 	["Name"] = "ViewModelController",
+	["Animator"] = ViewModelAnimator,
 })
 
 function ViewModelController:EquipGun(gunInstance)
@@ -59,15 +62,26 @@ function ViewModelController:EquipGun(gunInstance)
 		end
 	end
 
+	ViewModelAnimator:ImportAnimations(gunModel.Animations)
 
-
-	ViewModeAnimator:ImportAnimations(gunInstance.Animations)
 	GunBone.Parent = ViewModel.Camera.cameraBone["upArm.R"]["elbow.R"]["LowArm.R"]
 	setGunMotor6Ds()
 	moveGunParts()
-	
-	ViewModeAnimator:Play("equip")
-	ViewModeAnimator:Play("idle")
+
+	Cleaner.watchStateUpdate = GunController.OnGunStateChange:Connect(function(newState, lastState)
+		local transitionInfo = ViewModelTransitions:GetTransitionInfo(lastState, newState)
+		local targetAnimationName = StateToNameConversionTable[GunStateEnums:GetEnumName(newState)]
+
+		ViewModelAnimator:StopAll()
+
+		if transitionInfo then
+			ViewModelAnimator:Play(transitionInfo.AnimationName)
+		end
+
+		if targetAnimationName ~= "None" or targetAnimationName ~= nil then
+			ViewModelAnimator:Play(targetAnimationName)
+		end
+	end)
 
 	Cleaner.equipGunTrash = function()
 		for _, instance in pairs(gunChildren) do
@@ -82,7 +96,7 @@ function ViewModelController:EnterFirstPersonView()
 		ViewModel.Camera.CFrame = workspace.Camera.CFrame
 	end
 
-	Client.CameraMode = Enum.CameraMode.LockFirstPerson
+	-- Client.CameraMode = Enum.CameraMode.LockFirstPerson
 	ViewModel.Parent = workspace.Camera
 
 	Cleaner.onUpdateTask = RunService.RenderStepped:Connect(update)
@@ -93,7 +107,6 @@ function ViewModelController:ExitFirstPersonView()
 	Cleaner.equipGunTrash = nil
 
 	Client.CameraMode = Enum.CameraMode.Classic
-
 	ViewModel.Parent = ReplicatedStorage
 end
 
@@ -102,7 +115,7 @@ function ViewModelController:KnitStart()
 end
 
 function ViewModelController:KnitInit()
-
+	GunController = require(Knit.Client.Controllers.GunController)
 end
 
 return ViewModelController

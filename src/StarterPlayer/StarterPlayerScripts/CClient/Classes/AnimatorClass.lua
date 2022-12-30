@@ -15,16 +15,22 @@ AnimatorClass.__index = AnimatorClass
 
 
 function AnimatorClass:Play(animationName)
-    if self.CurrentAnimation then
-        self.CurrentAnimation:Stop()
+    if self.CurrentTrack then
+        self.CurrentTrack:Stop()
     end
-
+    
     local track = self.Tracks[animationName]
     track:Play()
 
-    self.CurrentAnimation = animationName
+    self.CurrentTrack = self:GetTrack(animationName)
 
     return Promise.fromEvent(track.Stopped)
+end
+
+function AnimatorClass:StopAll()
+    for _, track in pairs(self.Tracks) do
+        track:Stop()
+    end
 end
 
 function AnimatorClass:GetTrack(trackName)
@@ -49,8 +55,6 @@ function AnimatorClass:ImportAnimations(animationsFolder)
                     ["Priority"] = animationObj:GetAttribute("Priority")
                 },
             }
-
-            loadAnimations()
         end
 
         return animations
@@ -62,10 +66,10 @@ function AnimatorClass:ImportAnimations(animationsFolder)
         for _, animation in pairs(animations) do
             local animationObject = animation.AnimationObject
             local animationProperties = animation.Properties
-            local track = self.Animator:LoadAnimation(animationObject)
+            local track = self.AnimatorObject:LoadAnimation(animationObject)
             
 
-            track.IsLooped = animationProperties.Looped
+            track.Looped = animationProperties.Looped
             track.Priority = animationProperties.Priority
 
             tracks[animation.Name] = track
@@ -85,7 +89,7 @@ end
 function AnimatorClass.new(animatorObject)
     local self = setmetatable({
         ["AnimatorObject"] = animatorObject,
-        ["CurrentAnimation"] = nil,
+        ["CurrentTrack"] = nil,
         ["Animations"] = {},
         ["Tracks"] = {},
     }, AnimatorClass)

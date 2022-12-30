@@ -7,15 +7,22 @@ local Knit = require(game:GetService("ReplicatedStorage").Knit)
 local CustomEnum = require(Knit.Shared.Lib.CustomEnum)
 
 local Constants = {
-	["GunStateEnum"] = CustomEnum.new(
-		"Ready",
-		"Firing",
+	["GunStateEnums"] = CustomEnum.new(
+		"HipReady",
+        "AimReady",
+
+		"AimFiring",
+        "HipFiring",
+
 		"Reloading",
-		"Disabled"
+        "Running",
+        
+		"Disabled",
+        "Unavailible"
 	)
 }
 
-local function setReadOnlyTable(table: Dictionary)
+local function setReadOnlyTable(table)
     local readOnly = setmetatable({}, {
         __index = table,
         __newindex = function(table, key, value)
