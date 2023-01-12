@@ -39,34 +39,14 @@ function ViewModelController:EquipGun(gunInstance)
 	end
 
 	local gunModel = GunsFolder[gunInstance.Name]:Clone()
-	
-	local gunChildren = gunModel:GetChildren()
 	local viewModelCamera = ViewModel:WaitForChild("Camera")
-	local GunBone = gunModel:WaitForChild("GunBone").HandGun
-
-	local function moveGunParts()
-		for _, instance in pairs(gunChildren) do
-			if instance.Name == "GunBone" then
-				continue
-			end
-
-			instance.Parent = ViewModel
-		end
-	end
-
-	local function setGunMotor6Ds()
-		for _, instance in pairs(gunModel:GetDescendants()) do
-			if instance:IsA("Motor6D") then
-				instance.Part0 = viewModelCamera
-			end
-		end
-	end
 
 	ViewModelAnimator:ImportAnimations(gunModel.Animations)
 
-	GunBone.Parent = ViewModel.Camera.cameraBone["upArm.R"]["elbow.R"]["LowArm.R"]
-	setGunMotor6Ds()
-	moveGunParts()
+	gunModel.Parent = ViewModel
+	viewModelCamera.Handle.Part1 = gunModel.Handle
+
+	local currentTransitionConnection
 
 	Cleaner.watchStateUpdate = GunController.OnGunStateChange:Connect(function(newState, lastState)
 		local transitionInfo = ViewModelTransitions:GetTransitionInfo(lastState, newState)
@@ -75,20 +55,24 @@ function ViewModelController:EquipGun(gunInstance)
 		ViewModelAnimator:StopAll()
 
 		if transitionInfo then
-			ViewModelAnimator:Play(transitionInfo.AnimationName)
+			currentTransitionConnection = ViewModelAnimator:Play(transitionInfo.AnimationName)
+			currentTransitionConnection = nil
 		end
 
 		if targetAnimationName ~= "None" or targetAnimationName ~= nil then
+			if currentTransitionConnection then
+				currentTransitionConnection.Completed:Wait()
+			end
+
 			ViewModelAnimator:Play(targetAnimationName)
+
+			currentTransitionConnection = nil
 		end
 	end)
 
 	Cleaner.equipGunTrash = function()
-		for _, instance in pairs(gunChildren) do
-			instance:Destroy()
-		end
+		gunModel:Destroy()
 	end
-	-- Play idle animation
 end
 
 function ViewModelController:EnterFirstPersonView()

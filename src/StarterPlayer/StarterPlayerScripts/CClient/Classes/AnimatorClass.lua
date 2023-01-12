@@ -19,12 +19,18 @@ function AnimatorClass:Play(animationName)
         self.CurrentTrack:Stop()
     end
     
-    local track = self.Tracks[animationName]
+    local track = self:GetTrack(animationName)
+
+    if track == nil then
+        warn(animationName .. " WAS NOT FOUND!")
+        return
+    end
+
     track:Play()
 
-    self.CurrentTrack = self:GetTrack(animationName)
+    self.CurrentTrack = track
 
-    return Promise.fromEvent(track.Stopped)
+    return Promise.fromEvent(track.Ended)
 end
 
 function AnimatorClass:StopAll()

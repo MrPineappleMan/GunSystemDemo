@@ -18,7 +18,6 @@ function GunClass.new(gunInstance)
 		["Maid"] = Maid.new()
 	}, GunClass)
 
-	print(self)
     return self
 end
 

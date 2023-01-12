@@ -49,7 +49,7 @@ addTransition(
 addTransition(
     "Running",
     "HipReady",
-    "StandToRun"
+    "RunningToStand"
 )
 
 -- From Nothing
