@@ -10,6 +10,7 @@ local Knit = require(game:GetService("ReplicatedStorage").Knit)
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
 
 local GunController
 
@@ -48,25 +49,43 @@ function ViewModelController:EquipGun(gunInstance)
 
 	local currentTransitionConnection
 
+	local transitionInfo
+	local targetAnimationName 
+	local lastAnimationName
+
+	-- Notify animator of updates
 	Cleaner.watchStateUpdate = GunController.OnGunStateChange:Connect(function(newState, lastState)
-		local transitionInfo = ViewModelTransitions:GetTransitionInfo(lastState, newState)
-		local targetAnimationName = StateToNameConversionTable[GunStateEnums:GetEnumName(newState)]
+		transitionInfo = ViewModelTransitions:GetTransitionInfo(lastState, newState)
+		targetAnimationName = StateToNameConversionTable[GunStateEnums:GetEnumName(newState)]
+	end)
 
-		ViewModelAnimator:StopAll()
+	local lastUpdated = tick()
+	local ANIMATION_COOLDOWN = 0.15
 
-		if transitionInfo then
-			currentTransitionConnection = ViewModelAnimator:Play(transitionInfo.AnimationName)
-			currentTransitionConnection = nil
-		end
+	-- Watch for updates and only update after the cooldown is complete
+	Cleaner.onHeartbeatWatch = RunService.Heartbeat:Connect(function(deltaTime)
+		local timeDifference = tick() - lastUpdated
 
-		if targetAnimationName ~= "None" or targetAnimationName ~= nil then
-			if currentTransitionConnection then
-				currentTransitionConnection.Completed:Wait()
+		if timeDifference >= ANIMATION_COOLDOWN and targetAnimationName ~= lastAnimationName then
+			lastUpdated = tick()
+			lastAnimationName = targetAnimationName
+
+			ViewModelAnimator:StopAll()
+
+			if transitionInfo then
+				currentTransitionConnection = ViewModelAnimator:Play(transitionInfo.AnimationName)
+				currentTransitionConnection = nil
 			end
-
-			ViewModelAnimator:Play(targetAnimationName)
-
-			currentTransitionConnection = nil
+	
+			if targetAnimationName ~= "None" or targetAnimationName ~= nil then
+				if currentTransitionConnection then
+					currentTransitionConnection.Completed:Wait()
+				end
+	
+				ViewModelAnimator:Play(targetAnimationName)
+	
+				currentTransitionConnection = nil
+			end
 		end
 	end)
 
@@ -82,15 +101,16 @@ function ViewModelController:EnterFirstPersonView()
 
 	-- Client.CameraMode = Enum.CameraMode.LockFirstPerson
 	ViewModel.Parent = workspace.Camera
+	UserInputService.MouseIconEnabled = false
 
 	Cleaner.onUpdateTask = RunService.RenderStepped:Connect(update)
 end
 
 function ViewModelController:ExitFirstPersonView()
-	Cleaner.onUpdateTask = nil
-	Cleaner.equipGunTrash = nil
+	Cleaner:DoCleaning()
 
 	Client.CameraMode = Enum.CameraMode.Classic
+	UserInputService.MouseIconEnabled = true
 	ViewModel.Parent = ReplicatedStorage
 end
 

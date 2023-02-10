@@ -52,30 +52,16 @@ local function HandleGunTasks(gun)
 
 	local currentState = GunController.GunState
 
-	local function isInputInvalidated(...)
-		local invalidStates = {...}
-		local isInvalid = false
-
-		for _, value in pairs(invalidStates) do
-			if currentState == value then
-				isInvalid = true
-			end
-		end
-
-		return isInvalid
-	end
-
-	local function isValidState(...)
+	local function isCurrentStateValid(...)
 		local validStates = {...}
-		local canReverse = false
 
 		for _, value in pairs(validStates) do
 			if currentState == value then
-				canReverse = true
+				return true
 			end
 		end
 
-		return canReverse
+		return false
 	end
 
 	local function handleInput(inputObject, gameProcessedEvent)
@@ -84,32 +70,33 @@ local function HandleGunTasks(gun)
 		currentState = GunController.GunState
 
 		if inputObject.UserInputType == Enum.UserInputType.MouseButton1 then -- Fire Weapon Input
-			if isInputInvalidated(GunStateEnums.Running, GunStateEnums.Reloading) then
+			if isCurrentStateValid(GunStateEnums.Running, GunStateEnums.Reloading) then
 				return
 			end
 
 			targetState = (currentState == GunStateEnums.HipReady) and GunStateEnums.HipFiring or GunStateEnums.AimFiring
 		elseif inputObject.UserInputType == Enum.UserInputType.MouseButton2 then	-- Aim Down Sights Input
-			if isInputInvalidated(GunStateEnums.Running, GunStateEnums.Reloading) then
+			if isCurrentStateValid(GunStateEnums.Running, GunStateEnums.Reloading) then
 				return
 			end
 
 			targetState = GunStateEnums.AimReady
 		elseif keyCode == Enum.KeyCode.LeftShift then 	-- Run Input
-			if isInputInvalidated(GunStateEnums.AimFiring, GunStateEnums.HipFiring, GunStateEnums.Reloading) then
+			if isCurrentStateValid(GunStateEnums.AimFiring, GunStateEnums.HipFiring, GunStateEnums.Reloading) then
 				return
 			end
 
 			targetState = GunStateEnums.Running
 		elseif keyCode == Enum.KeyCode.R then 	-- Reload Input
-			if isInputInvalidated(GunStateEnums.Running, GunStateEnums.HipFiring, GunStateEnums.Reloading) then
+			if isCurrentStateValid(GunStateEnums.Running, GunStateEnums.HipFiring, GunStateEnums.Reloading) then
 				return
 			end
 
 			targetState = GunStateEnums.Reloading
 		end
 
-		-- Note. If a value is invalid then it will not set the state anyways
+		-- Note. If a value is invalid then it will not set the state anyway
+
 		GunController:SetGunState(targetState)
 	end
 
@@ -119,16 +106,16 @@ local function HandleGunTasks(gun)
 		currentState = GunController.GunState
 
 		-- Fire Weapon Input
-		if inputObject.UserInputType == Enum.UserInputType.MouseButton1 and isValidState(GunStateEnums.AimFiring, GunStateEnums.HipFiring) then
+		if inputObject.UserInputType == Enum.UserInputType.MouseButton1 and isCurrentStateValid(GunStateEnums.AimFiring, GunStateEnums.HipFiring) then
 			targetState = (currentState == GunStateEnums.HipFiring) and GunStateEnums.HipReady or GunStateEnums.AimReady
 
 		-- Aim Down Sights Input
-		elseif inputObject.UserInputType == Enum.UserInputType.MouseButton2 and isValidState(GunStateEnums.AimReady, GunStateEnums.AimFiring) then
+		elseif inputObject.UserInputType == Enum.UserInputType.MouseButton2 and isCurrentStateValid(GunStateEnums.AimReady, GunStateEnums.AimFiring) then
 			targetState = GunStateEnums.HipReady
 
 		-- Run Input
-		elseif keyCode == Enum.KeyCode.LeftShift and isValidState(GunStateEnums.Running) then
-			if isValidState(GunStateEnums.AimFiring, GunStateEnums.HipFiring, GunStateEnums.Reloading) then
+		elseif keyCode == Enum.KeyCode.LeftShift and isCurrentStateValid(GunStateEnums.Running) then
+			if isCurrentStateValid(GunStateEnums.AimFiring, GunStateEnums.HipFiring, GunStateEnums.Reloading) then
 				return
 			end
 

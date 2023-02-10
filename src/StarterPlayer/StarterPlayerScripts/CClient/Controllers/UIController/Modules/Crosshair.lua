@@ -15,9 +15,6 @@ local UIController = script:FindFirstAncestor("UIController")
 local Components = UIController.Components
 local FadeAnimation = require(Components.FadeAnimation)
 
-local leaderstats = Client:WaitForChild("leaderstats")
-local total_count = leaderstats:WaitForChild("TotalCash")
-
 local Crosshair = {}
 
 local fadeAnimations = {}
@@ -37,13 +34,12 @@ function Crosshair:Init()
         fadeAnimations[image] = FadeAnimation.new(image, time)
     end
 
-    addToFade(cheque_holder, 0.5)
+    addToFade(firing_icon, 0.2)
+    addToFade(running_icon, 0.2)
 
     for _, fadeAnim in pairs(fadeAnimations) do
         fadeAnim:UnLoadNow()
     end
-
-    ClientGui.Cheque.Enabled = true
 end
 
 return Crosshair
