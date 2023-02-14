@@ -11,12 +11,13 @@ function GunClass.new(gunInstance)
 	local defaultGunConfigs = GunConfigs[gunType]
 
 	local self = setmetatable({
-		["GunInstance"] = gunInstance,
+		["GunTool"] = gunInstance,
 
 		["AmmoReserve"] = defaultGunConfigs.AmmoReserve,
 		["AmmoMag"] = defaultGunConfigs.Ammo,
 
 		["FireType"] = defaultGunConfigs.FireType,
+		["FireRate"] = defaultGunConfigs.FireRate,
 		["Type"] = gunType,
 		["State"] = nil,
 

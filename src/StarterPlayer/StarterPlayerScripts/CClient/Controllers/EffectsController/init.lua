@@ -9,6 +9,11 @@ function EffectController:DisplayEffect(effectName, ...)
     effectModule.Display(...)
 end
 
+function EffectController:KillEffect(effectName, ...)
+    local effectModule = require(script[effectName])
+    effectModule.Kill(...)
+end
+
 function EffectController:KnitStart()
 	
 end

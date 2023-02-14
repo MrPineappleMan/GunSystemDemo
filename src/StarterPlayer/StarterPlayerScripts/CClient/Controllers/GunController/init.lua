@@ -1,10 +1,12 @@
 local Knit = require(game:GetService("ReplicatedStorage").Knit)
 
 local CollectionService = game:GetService("CollectionService")
+local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Players = game:GetService("Players")
 
 local ViewModelController 
+local EffectsController
 
 local MaidClass = require(Knit.Shared.Lib.Maid)
 local GunClass = require(Knit.Shared.Classes.GunClass)
@@ -32,8 +34,17 @@ local GunController = Knit.CreateController({
 
 local GunsOnHand = {}
 
+
+local function displayWeaponFiringEffects(gun)
+	EffectsController:DisplayEffect("MuzzleFlash", gun.GunModel)
+end
+
+local function removeWeaponFiringEffects(gun)
+	EffectsController:KillEffect("MuzzleFlash", gun.GunModel)
+end
+
 local function HandleGunTasks(gun)
-	local gunInstance = gun.GunInstance
+	local gunInstance = gun.GunTool
 	local gunCleaner = gun.Maid
 	local gunInputCleaner = MaidClass.new()
 
@@ -77,10 +88,47 @@ local function HandleGunTasks(gun)
 		end
 	end
 
+	local isInFiringState
+	local lastUpdatedFiringState
+
+	gunInputCleaner:GiveTask(GunController.OnGunStateChange:Connect(function(newState, lastState)
+		local fireType = gun.FireType
+		isInFiringState = (newState == GunStateEnums.AimFiring or newState == GunStateEnums.HipFiring)
+
+		-- If is semi auto, make sure to turn off firing state asap!
+		if fireType == "Semi" and isInFiringState then
+			task.delay(0.1, function()
+				local targetState = newState == GunStateEnums.HipFiring and GunStateEnums.HipReady or GunStateEnums.AimReady
+				GunController:SetGunState(targetState)
+			end)
+		end
+	end))
+
+
+	--Handle gun firing!
+	--Displays effects and handles the logic!
+	local lastFired = tick()
+
+	gunInputCleaner:GiveTask(RunService.RenderStepped:Connect(function()
+		local timeDifference = tick() - lastFired
+		local fireRatePerSecond = 60 / gun.FireRate
+
+		if timeDifference >= fireRatePerSecond and isInFiringState then
+			lastUpdatedFiringState = isInFiringState
+			lastFired = tick()
+			
+			displayWeaponFiringEffects(gun)
+			print("DISPLAY")
+		elseif lastUpdatedFiringState == true and isInFiringState == false then
+			removeWeaponFiringEffects(gun)
+			lastUpdatedFiringState = isInFiringState
+		end
+	end))
+
 	gunCleaner:GiveTask(gunInstance.Equipped:Connect(function()
 		GunController.CurrentGunObject = gun
 		ViewModelController:EnterFirstPersonView()
-		ViewModelController:EquipGun(gunInstance)
+		ViewModelController:EquipGun(gun)
 
 		GunController:SetGunState(GunStateEnums.HipReady)
 
@@ -144,21 +192,11 @@ function GunController:KnitStart()
 
 	CollectionService:GetInstanceAddedSignal(GUN_TAG):Connect(AddGunToSystem)
 	CollectionService:GetInstanceRemovedSignal(GUN_TAG):Connect(RemoveGunFromSystem)
-
-	self.OnGunStateChange:Connect(function(newState, lastState)
-		local currentGun = self.CurrentGunObject
-
-		if currentGun.FireType == "Semi" and (newState == GunStateEnums.HipFiring or newState == GunStateEnums.AimFiring) then
-			task.delay(0.1, function()
-				local targetState = newState == GunStateEnums.HipFiring and GunStateEnums.HipReady or GunStateEnums.AimReady
-				self:SetGunState(targetState)
-			end)
-		end
-	end)
 end
 
 function GunController:KnitInit()
 	ViewModelController = require(Knit.Client.Controllers.ViewModelController)
+	EffectsController = require(Knit.Client.Controllers.EffectsController)
 end
 
 return GunController

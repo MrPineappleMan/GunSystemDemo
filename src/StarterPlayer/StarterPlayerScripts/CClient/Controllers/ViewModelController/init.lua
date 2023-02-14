@@ -34,16 +34,18 @@ local ViewModelController = Knit.CreateController({
 	["Animator"] = ViewModelAnimator,
 })
 
-function ViewModelController:EquipGun(gunInstance)
+function ViewModelController:EquipGun(gun)
 	if Cleaner.onUpdateTask == nil then
 		self:EnterFirstPersonView()
 	end
 
-	local gunModel = GunsFolder[gunInstance.Name]:Clone()
+	local gunTool = gun.GunTool
+	local gunModel = GunsFolder[gunTool.Name]:Clone()
 	local viewModelCamera = ViewModel:WaitForChild("Camera")
 
 	ViewModelAnimator:ImportAnimations(gunModel.Animations)
 
+	gun.GunModel = gunModel
 	gunModel.Parent = ViewModel
 	viewModelCamera.Handle.Part1 = gunModel.Handle
 

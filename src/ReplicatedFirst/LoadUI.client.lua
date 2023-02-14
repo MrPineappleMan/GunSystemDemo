@@ -25,6 +25,7 @@ end
 
 -- Move ScreenGuis into PlayerGui:
 local shouldRemove = true
+
 for i,v in ipairs(guis:GetChildren()) do
 	if (v:IsA("LayerCollector") and v.ResetOnSpawn) then
 		-- Respect ResetOnSpawn:
@@ -42,7 +43,8 @@ for i,v in ipairs(guis:GetChildren()) do
 		v.Parent = playerGui
 	end
 end
-wait(2)
+
+wait(1)
 _G.GuiLoaded = true
 event:Fire()
 if (shouldRemove) then
