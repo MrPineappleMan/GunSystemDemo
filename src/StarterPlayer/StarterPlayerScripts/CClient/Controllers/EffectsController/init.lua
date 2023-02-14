@@ -4,6 +4,11 @@ local EffectController = Knit.CreateController({
     ["Name"] = "EffectController",
 })
 
+function EffectController:DisplayEffect(effectName, ...)
+    local effectModule = require(script[effectName])
+    effectModule.Display(...)
+end
+
 function EffectController:KnitStart()
 	
 end
